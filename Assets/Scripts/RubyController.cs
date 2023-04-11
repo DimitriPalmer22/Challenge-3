@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class RubyController : MonoBehaviour
 {
@@ -42,15 +43,28 @@ public class RubyController : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void UpdateInput()
     {
+        // restart
+        if (RobotCounter.Instance.gameOver && Input.GetKeyDown(KeyCode.R))
+            Restart();
 
-        if (Input.GetButtonDown("Fire1"))
+        // disable input if dead
+        if (health <= 0) 
         {
-            Launch();
+            horizontal = vertical = 0;
+            return;
         }
 
+        // Movement
+        horizontal = Input.GetAxis("Horizontal");
+        vertical = Input.GetAxis("Vertical");
+
+        // shoot
+        if (Input.GetButtonDown("Fire1"))
+            Launch();
+
+        // interact with NPCs
         if (Input.GetKeyDown(KeyCode.X))
         {
             RaycastHit2D hit = Physics2D.Raycast(
@@ -70,8 +84,12 @@ public class RubyController : MonoBehaviour
             }
         }
 
-        horizontal = Input.GetAxis("Horizontal");
-        vertical = Input.GetAxis("Vertical");
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        UpdateInput();
 
         Vector2 move = new Vector2(horizontal, vertical);
 
@@ -91,7 +109,6 @@ public class RubyController : MonoBehaviour
             if (invincibleTimer < 0) isInvincible = false;
         }
 
-
     }
 
     void FixedUpdate()
@@ -99,8 +116,6 @@ public class RubyController : MonoBehaviour
         Vector2 position = transform.position;
         position.x += speed * horizontal * Time.deltaTime;
         position.y += speed * vertical * Time.deltaTime;
-        // position += speed * move * Time.deltaTime;
-
 
         rigidbody2d.MovePosition(position);
     }
@@ -108,7 +123,7 @@ public class RubyController : MonoBehaviour
     public void ChangeHealth(int amount)
     {
         // taking damage            
-        if (amount < 0)
+        if (amount < 0 && health > 0)
         {
             if (isInvincible) return;
 
@@ -118,8 +133,12 @@ public class RubyController : MonoBehaviour
             PlaySound(damaged);
 
             damageParticles.Emit(-amount * PARTICLE_AMOUNT);
+
+            if (RobotCounter.Instance.gameWon) amount = 0;
+
         }
 
+        // healing
         else if (amount > 0)
         {
             healthParticles.Emit(amount * PARTICLE_AMOUNT);
@@ -127,6 +146,14 @@ public class RubyController : MonoBehaviour
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
         UIHealthBar.instance.SetValue(currentHealth / (float)maxHealth);
+
+        // dead
+        if (currentHealth <= 0)
+        {
+            RobotCounter.Instance.gameLost = true;
+            RobotCounter.Instance.DisplayEndMessage("You Lose! Press R to Restart!");
+            BackgroundMusicController.Instance.PlayLoseMusic();
+        }
     }
 
     void Launch()
@@ -144,4 +171,12 @@ public class RubyController : MonoBehaviour
     {
         audioSource.PlayOneShot(clip);
     }
+
+    private void Restart()
+    {
+        if (RobotCounter.Instance.gameWon && !RobotCounter.Instance.finalLevel) return;
+
+        SceneManager.LoadScene("Main", LoadSceneMode.Single);
+    }
+
 }

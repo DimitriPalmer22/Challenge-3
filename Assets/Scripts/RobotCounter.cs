@@ -7,23 +7,28 @@ using UnityEngine.UI;
 
 public class RobotCounter : MonoBehaviour
 {
-
     public static RobotCounter Instance { get; private set; }
 
-    private TMP_Text text;
+    private TMP_Text countText;
     private int robotCount;
     private int robotsFixed = 0;
 
-    // Start is called before the first frame update
+    public TMP_Text winText;
+    public bool finalLevel;
+
+    [HideInInspector] public bool gameLost = false;
+    [HideInInspector] public bool gameWon = false;
+    [HideInInspector] public bool gameOver => gameWon || gameLost;
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance != this) Instance = this;
 
-        text = GetComponent<TMP_Text>();
+        countText = GetComponent<TMP_Text>();
 
         GetRobotCount();
         UpdateText();
+        winText.gameObject.SetActive(false);
     }
 
     private void GetRobotCount()
@@ -35,11 +40,26 @@ public class RobotCounter : MonoBehaviour
     {
         robotsFixed++;
         UpdateText();
+
+        // win
+        if (robotsFixed >= robotCount)
+        {
+            gameWon = true;
+            if (finalLevel) DisplayEndMessage("You Win!\nGame Created By Dimitri Palmer\nPress R To Restart!");
+            else DisplayEndMessage("You Win! Talk to Jambi to go to Level 2!");
+            BackgroundMusicController.Instance.PlayWinMusic();
+        }
     }
 
     private void UpdateText()
     {
-        text.text = $"Robots Fixed: {robotsFixed} / {robotCount}";
+        countText.text = $"Robots Fixed: {robotsFixed} / {robotCount}";
+    }
+
+    public void DisplayEndMessage(string text)
+    {
+        winText.gameObject.SetActive(true);
+        winText.text = text;
     }
 
 }
