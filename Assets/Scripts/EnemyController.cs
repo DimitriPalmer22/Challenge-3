@@ -5,25 +5,27 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     public Vector2 movement;
-    Rigidbody2D rigidbody2D;
-    Animator animator;
+    protected Rigidbody2D rigidbody2D;
+    protected Animator animator;
     public ParticleSystem smokeEffect;
 
     public float changeTime = 3.0f;
-    float timer;
-    int direction = 1;
+    protected float timer;
+    protected int direction = 1;
+
+    protected int damage = 1;
 
     private bool broken = true;
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
         timer = changeTime;
         animator = GetComponent<Animator>();
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (!broken) return;
 
@@ -40,7 +42,7 @@ public class EnemyController : MonoBehaviour
         animator.SetFloat("Move Y", normalMoveVec.y);
     }
 
-    void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         if (!broken) return;
 
@@ -50,22 +52,23 @@ public class EnemyController : MonoBehaviour
         rigidbody2D.MovePosition(position);
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
+    protected virtual void OnCollisionEnter2D(Collision2D other)
     {
 
         RubyController player = other.gameObject.GetComponent<RubyController>();
 
         if (player == null) return;
 
-        player.ChangeHealth(-1);
+        player.ChangeHealth(-damage);
     }
 
-    public void Fix()
+    public virtual void Fix()
     {
         broken = false;
         rigidbody2D.simulated = false;
         animator.SetTrigger("Fixed");
         smokeEffect.Stop();
+        RobotCounter.Instance.AddFixedRobot();
     }
 
 }

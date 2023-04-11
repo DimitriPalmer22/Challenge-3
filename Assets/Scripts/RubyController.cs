@@ -117,12 +117,12 @@ public class RubyController : MonoBehaviour
             animator.SetTrigger("Hit");
             PlaySound(damaged);
 
-            damageParticles.Emit(PARTICLE_AMOUNT);
+            damageParticles.Emit(-amount * PARTICLE_AMOUNT);
         }
 
         else if (amount > 0)
         {
-            healthParticles.Emit(PARTICLE_AMOUNT);
+            healthParticles.Emit(amount * PARTICLE_AMOUNT);
         }
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
