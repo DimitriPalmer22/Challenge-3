@@ -27,6 +27,11 @@ public class RubyController : MonoBehaviour
 
     public GameObject projectilePrefab;
 
+    public ParticleSystem healthParticles;
+    public ParticleSystem damageParticles;
+
+    private const int PARTICLE_AMOUNT = 30;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -111,6 +116,13 @@ public class RubyController : MonoBehaviour
             invincibleTimer = timeInvincible;
             animator.SetTrigger("Hit");
             PlaySound(damaged);
+
+            damageParticles.Emit(PARTICLE_AMOUNT);
+        }
+
+        else if (amount > 0)
+        {
+            healthParticles.Emit(PARTICLE_AMOUNT);
         }
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
