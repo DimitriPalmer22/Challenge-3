@@ -8,6 +8,7 @@ public class HardEnemyController : EnemyController
     public HardEnemyController()
     {
         damage = 2;
+        moveSpeed = 3.5f;
     }
 
 }

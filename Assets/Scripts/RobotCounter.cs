@@ -31,9 +31,10 @@ public class RobotCounter : MonoBehaviour
         winText.gameObject.SetActive(false);
     }
 
-    private void GetRobotCount()
+    public int GetRobotCount()
     {
         robotCount = GameObject.FindGameObjectsWithTag("Enemy").Count();
+        return robotCount;
     }
 
     public void AddFixedRobot()
@@ -45,9 +46,12 @@ public class RobotCounter : MonoBehaviour
         if (robotsFixed >= robotCount)
         {
             gameWon = true;
-            if (finalLevel) DisplayEndMessage("You Win!\nGame Created By Dimitri Palmer\nPress R To Restart!");
-            else DisplayEndMessage("You Win! Talk to Jambi to go to Level 2!");
-            BackgroundMusicController.Instance.PlayWinMusic();
+            if (finalLevel) 
+            {
+                DisplayEndMessage("You Win!\nGame Created By Dimitri Palmer\nPress R To Restart!");
+                BackgroundMusicController.Instance.PlayWinMusic();
+            }
+            else DisplayEndMessage("You Win! Talk to Jambi to go to Level 2!\nPress R To Restart!");
         }
     }
 

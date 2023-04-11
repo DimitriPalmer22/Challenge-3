@@ -9,7 +9,8 @@ public class EnemyController : MonoBehaviour
     protected Animator animator;
     public ParticleSystem smokeEffect;
 
-    public float changeTime = 3.0f;
+    protected float moveSpeed = 2;
+    protected float changeTime => movement.magnitude / moveSpeed;
     protected float timer;
     protected int direction = 1;
 

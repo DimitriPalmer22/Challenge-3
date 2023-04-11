@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class NonPlayerCharacter : MonoBehaviour
 {
@@ -27,6 +28,15 @@ public class NonPlayerCharacter : MonoBehaviour
 
     public void DisplayDialog()
     {
+        // change level
+        if (RobotCounter.Instance.gameWon && 
+            !RobotCounter.Instance.finalLevel && 
+            gameObject.name == "Jambi")
+        {
+            SceneManager.LoadScene("Level 2");
+            return;
+        }
+
         timerDisplay = displayTime;
         dialogBox.SetActive(true);
     }

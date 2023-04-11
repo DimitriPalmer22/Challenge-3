@@ -8,13 +8,18 @@ public class RubyController : MonoBehaviour
 
     private Rigidbody2D rigidbody2d;
     Animator animator;
+    
+    // audio
     AudioSource audioSource;
     public AudioClip cogLaunched;
     public AudioClip damaged;
+    public float timeInvincible = 2.0f;
+    private bool isInvincible;
+    private float invincibleTimer;
 
+    // Movement
     private float horizontal;
     private float vertical;
-
     Vector2 lookDirection = new Vector2(1, 0);
     public float speed = 3f;
 
@@ -22,15 +27,14 @@ public class RubyController : MonoBehaviour
     private int currentHealth;
     public int health => currentHealth;
 
-    public float timeInvincible = 2.0f;
-    private bool isInvincible;
-    private float invincibleTimer;
+    private int cogs;
+
 
     public GameObject projectilePrefab;
 
+    // particles
     public ParticleSystem healthParticles;
     public ParticleSystem damageParticles;
-
     private const int PARTICLE_AMOUNT = 30;
 
     // Start is called before the first frame update
@@ -41,6 +45,10 @@ public class RubyController : MonoBehaviour
         animator = GetComponent<Animator>();
 
         audioSource = GetComponent<AudioSource>();
+
+        cogs = RobotCounter.Instance.GetRobotCount();
+
+        CogCounter.Instance.SetCount(cogs);
     }
 
     private void UpdateInput()
@@ -156,8 +164,17 @@ public class RubyController : MonoBehaviour
         }
     }
 
+    public void ChangeCogs(int amount)
+    {
+        cogs += amount;
+        if (cogs < 0) cogs = 0;
+        CogCounter.Instance.SetCount(cogs);
+    }
+
     void Launch()
     {
+        if (cogs <= 0) return;
+
         GameObject projectileObject = Instantiate(projectilePrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
 
         Projectile projectile = projectileObject.GetComponent<Projectile>();
@@ -165,6 +182,8 @@ public class RubyController : MonoBehaviour
 
         animator.SetTrigger("Launch");
         PlaySound(cogLaunched);
+
+        ChangeCogs(-1);
     }
 
     public void PlaySound(AudioClip clip)
@@ -174,9 +193,14 @@ public class RubyController : MonoBehaviour
 
     private void Restart()
     {
-        if (RobotCounter.Instance.gameWon && !RobotCounter.Instance.finalLevel) return;
+        if (RobotCounter.Instance.gameWon)
+        {
+            if (RobotCounter.Instance.finalLevel) 
+                SceneManager.LoadScene("Main", LoadSceneMode.Single);
+            else 
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+        }
 
-        SceneManager.LoadScene("Main", LoadSceneMode.Single);
+        else SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single); 
     }
-
 }
